@@ -5,7 +5,7 @@ import { createWorkspaceController, deleteWorkspaceController, getUserWorkspaces
 const workspaceRouter = express.Router()
 
 
-workspaceRouter.post('/create', authMiddleware, createWorkspaceController)
+workspaceRouter.post('/', authMiddleware, createWorkspaceController)
 workspaceRouter.get('/', authMiddleware, getUserWorkspacesController)
 workspaceRouter.put('/delete/:workspaceName', authMiddleware, deleteWorkspaceController)
 
