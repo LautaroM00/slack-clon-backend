@@ -1,0 +1,19 @@
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const { MYSQL_DATABASE, MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_HOST, SECRET_KEY, EMAIL_PASSWORD, EMAIL_USER } = process.env
+
+const ENVIROMENT = {
+    EMAIL_PASSWORD: EMAIL_PASSWORD,
+    EMAIL_USER: EMAIL_USER,
+    SECRET_KEY: SECRET_KEY,
+    MYSQL: {
+        DATABASE: MYSQL_DATABASE,
+        HOST: MYSQL_HOST,
+        PASSWORD: MYSQL_PASSWORD,
+        USERNAME: MYSQL_USERNAME
+    }
+}
+
+export default ENVIROMENT
