@@ -6,7 +6,7 @@ export default class WorkspaceRepository {
 
         const query = 'INSERT INTO Workspaces(name, owner_id) VALUES(?, ?)'
 
-        const result = pool.execute(query, [name, owner_id])
+        const result = await pool.execute(query, [name, owner_id])
 
         return result
     }
@@ -29,14 +29,63 @@ export default class WorkspaceRepository {
         return result[0]['changedRows']
     }
 
-/*     static async s() {
+    /* MEMBERS */
 
-        const query = ''
+    static async addWorkspaceMember(belongs_to, user_id) {
 
-        const result = await pool.execute(query, [])
+        const query = 'INSERT INTO Workspace_members(belongs_to, user_id) VALUES(?, ?)'
 
-        return result[0][0]
-    } */
+        const result = await pool.execute(query, [belongs_to, user_id])
+
+        return result
+    }
+
+
+
+
+    static async deleteWorkspaceMember(belongs_to, user_id) {
+
+        const query = 'DELETE FROM Workspace_members WHERE belongs_to = ? AND user_id = ?'
+
+        const result = await pool.execute(query, [belongs_to, user_id])
+
+        return result
+    }
+
+
+
+
+
+
+    static async getWorkspaceMembers(belongs_to) {
+
+        const query = `SELECT * FROM workspace_members
+INNER JOIN Users ON workspace_members.user_id = Users.id
+WHERE workspace_members.belongs_to = ?`
+
+        const result = await pool.execute(query, [belongs_to])
+
+        return result[0]
+    }
+
+
+
+
+
+
+    /*     static async s() {
+    
+            const query = ''
+    
+            const result = await pool.execute(query, [])
+    
+            return result[0][0]
+        } */
+
+
+
+
+
 
 
 

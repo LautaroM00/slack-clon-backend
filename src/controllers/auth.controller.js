@@ -52,7 +52,7 @@ export const registerController = async (req, res, next) => {
         await emailTransporter.sendMail({
             to: userData.email,
             subject: 'Slack clon - Confirmación de registro',
-            html: getRegisterHTML(userData.name, 'http://localhost:5000/api/auth/verification/' + verificationToken)
+            html: getRegisterHTML(userData.name, ENVIROMENT.URL_FRONT + '/verify-email/' + verificationToken)
         })
 
         const response = new ResponseBuilder()
@@ -129,9 +129,9 @@ export const loginController = async (req, res, next) => {
 export const verifyEmailController = async (req, res, next) => {
     try {
 
-        const { accessToken } = req.params
+        const { verificationToken } = req.params
 
-        const data = jwt.verify(accessToken, ENVIROMENT.SECRET_KEY)
+        const data = jwt.verify(verificationToken, ENVIROMENT.SECRET_KEY)
 
         await UserRepository.verifyUser(data.email)
 
@@ -183,7 +183,7 @@ export const forgotPasswordController = async (req, res, next) => {
         await emailTransporter.sendMail({
             to: email,
             subject: 'Slack clon - Olvidé mi contraseña',
-            html: getForgotPasswordHTML(userDB.name, 'http://localhost:5000/reset-password/' + validationToken)
+            html: getForgotPasswordHTML(userDB.name, ENVIROMENT.URL_FRONT + '/reset-password/' + validationToken)
         })
 
         const response = new ResponseBuilder()

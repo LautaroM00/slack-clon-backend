@@ -6,7 +6,7 @@ const authRouter = express.Router()
 
 authRouter.post('/register', registerController)
 authRouter.post('/login', loginController)
-authRouter.get('/verification/:accessToken', verifyEmailController)
+authRouter.get('/verification/:verificationToken', verifyEmailController)
 authRouter.post('/forgot-password', forgotPasswordController)
 authRouter.put('/reset-password/:validationToken', resetPasswordController)
 
