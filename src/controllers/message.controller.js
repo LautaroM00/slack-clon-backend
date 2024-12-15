@@ -1,5 +1,6 @@
 import ResponseBuilder from "../helpers/builders/ResponseBuilder.js"
 import MessageRepository from "../repositories/Message.repository.js"
+import { dateFormatter } from "../helpers/dateFormatter.js"
 
 export const createMessageController = async (req, res, next) => {
     try {
@@ -42,11 +43,13 @@ export const getMessagesController = async (req, res, next) => {
 
         const messages = await MessageRepository.getChannelMessages(channel_id)
 
+        const messagesFormatted = dateFormatter(messages)
+
         const response = new ResponseBuilder()
             .setCode('MESSAGE_RECEIVED_SUCCESS')
             .setMessage('Mensajes recibidos con éxito.')
             .setPayload({
-                messages: messages
+                messages: messagesFormatted
             })
             .build()
 
