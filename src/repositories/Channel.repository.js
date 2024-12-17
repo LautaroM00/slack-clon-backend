@@ -13,11 +13,11 @@ export default class ChannelRepository {
     }
 
 
-    static async deleteChannel(belongs_to, channelName){
+    static async deleteChannel(belongs_to, channelId){
 
-        const query = 'UPDATE Channels SET active = 0 WHERE name = ? AND belongs_to = ?'
+        const query = 'UPDATE Channels SET active = 0 WHERE id = ? AND belongs_to = ?'
 
-        const result = await pool.execute(query, [channelName, belongs_to])
+        const result = await pool.execute(query, [channelId, belongs_to])
 
         return result
 

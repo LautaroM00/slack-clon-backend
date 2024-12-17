@@ -4,7 +4,11 @@ export default class MessageRepository{
 
     static async getChannelMessages(channel_id){
 
-        const query = 'SELECT * FROM Messages WHERE channel_id = ? AND active = 1 ORDER BY sent_at ASC'
+        const query = `SELECT messages.*, users.name FROM Messages
+INNER JOIN users
+ON messages.sender_id = users.id
+WHERE channel_id = ? AND messages.active = 1
+ORDER BY sent_at ASC`
 
         const result = await pool.execute(query, [channel_id])
 

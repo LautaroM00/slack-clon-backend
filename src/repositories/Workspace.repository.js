@@ -11,7 +11,7 @@ export default class WorkspaceRepository {
         return result
     }
 
-    static async getUserWorkspaces(owner_id) {
+    static async getAdminWorkspaces(owner_id) {
 
         const query = 'SELECT * FROM Workspaces WHERE owner_id = ? AND active = 1'
 
@@ -69,6 +69,17 @@ WHERE workspace_members.belongs_to = ?`
     }
 
 
+    static async getMemberWorkspaces(user_id) {
+        const query = `SELECT Workspaces.* FROM Workspace_members
+        INNER JOIN Workspaces
+        ON workspace_members.belongs_to = workspaces.name
+        WHERE user_id = ? AND active = 1
+        `
+
+        const result = await pool.execute(query, [user_id])
+
+        return result[0]
+    }
 
 
 

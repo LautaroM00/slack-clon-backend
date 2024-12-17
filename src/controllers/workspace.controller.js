@@ -1,4 +1,5 @@
 import ResponseBuilder from "../helpers/builders/ResponseBuilder.js"
+import ChannelRepository from "../repositories/Channel.repository.js"
 import UserRepository from "../repositories/User.repository.js"
 import WorkspaceRepository from "../repositories/Workspace.repository.js"
 
@@ -9,14 +10,15 @@ export const createWorkspaceController = async (req, res, next) => {
 
         const { id } = req.user
 
-        const { workspaceName } = req.body
-
+        const { formState } = req.body
+        const {workspaceName, channelName} = formState
         if (String(workspaceName).length < 5 || String(workspaceName).length > 20) {
             throw new Error()
         }
 
         await WorkspaceRepository.createWorkspace(workspaceName, id)
-        await WorkspaceRepository.addMember(workspaceName, id)
+        await WorkspaceRepository.addWorkspaceMember(workspaceName, id)
+        await ChannelRepository.createChannel(workspaceName, id, channelName)
 
         const response = new ResponseBuilder()
             .setCode('WORKSPACE_CREATED_SUCCESS')
@@ -27,7 +29,7 @@ export const createWorkspaceController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('getAllUserWorkspacesController: ', err)
+        console.log('createWorkspaceController: ', err)
 
         err.sql ? console.log(err.sqlMessage) : ''
 
@@ -36,26 +38,29 @@ export const createWorkspaceController = async (req, res, next) => {
 
 }
 
-export const getUserWorkspacesController = async (req, res, next) => {
-    try {
+export const getUserWorkspacesController = (admin) => {
 
-        const { id } = req.user
+    return async (req, res, next) => {
+        try {
 
-        const workspaces = await WorkspaceRepository.getUserWorkspaces(id)
-
-        const response = new ResponseBuilder()
-            .setCode('WORKSPACES_GIVEN_SUCCESS')
-            .setMessage('Workspaces enviados con éxito.')
-            .setPayload({
-                workspaces: workspaces
-            })
-            .build()
-
-        return res.json(response)
-
-    }
-    catch (err) {
-        console.log('getAllUserWorkspacesController: ', err)
+            const { id } = req.user
+    
+            const workspaces = admin ? await WorkspaceRepository.getAdminWorkspaces(id) :await  WorkspaceRepository.getMemberWorkspaces(id)
+    
+            const response = new ResponseBuilder()
+                .setCode('WORKSPACES_GIVEN_SUCCESS')
+                .setMessage('Workspaces enviados con éxito.')
+                .setPayload({
+                    workspaces: workspaces
+                })
+                .build()
+    
+            return res.json(response)
+    
+        }
+        catch (err) {
+            console.log('getAllUserWorkspacesController: ', err)
+        }
     }
 
 }
@@ -66,8 +71,6 @@ export const deleteWorkspaceController = async (req, res, next) => {
         const { id } = req.user
 
         const { workspaceName } = req.params
-
-
 
         if (!await WorkspaceRepository.deleteWorkspace(workspaceName, id)) {
             throw {
@@ -167,6 +170,29 @@ export const getWorkspaceMembersController = async (req, res, next) => {
     }
     catch (err) {
         console.log('deleteWorkspaceMemberController: ', err)
+    }
+}
+
+export const getMemberWorkspacesController = async (req, res, next) => {
+    try {
+
+        const { id } = req.user
+
+        const workspaces = await WorkspaceRepository.getMemberWorkspaces(id)
+
+        const response = new ResponseBuilder()
+            .setCode('WORKSPACES_GIVEN_SUCCESS')
+            .setMessage('Workspaces enviados con éxito.')
+            .setPayload({
+                workspaces: workspaces
+            })
+            .build()
+
+        return res.json(response)
+
+    }
+    catch (err) {
+        console.log('getAllUserWorkspacesController: ', err)
     }
 
 }

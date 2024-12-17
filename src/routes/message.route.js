@@ -8,6 +8,7 @@ messageRouter.post('/:channel_id', authMiddleware, createMessageController)
 messageRouter.get('/:channel_id', authMiddleware, getMessagesController)
 messageRouter.put('/:message_id', authMiddleware, deleteMessageController)
 
+messageRouter.get('/last-message/:channel_id', authMiddleware) // TO DO
 
 
 

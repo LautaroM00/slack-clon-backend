@@ -44,7 +44,7 @@ export const getMessagesController = async (req, res, next) => {
         const messages = await MessageRepository.getChannelMessages(channel_id)
 
         const messagesFormatted = dateFormatter(messages)
-
+        
         const response = new ResponseBuilder()
             .setCode('MESSAGE_RECEIVED_SUCCESS')
             .setMessage('Mensajes recibidos con éxito.')
@@ -82,4 +82,23 @@ export const deleteMessageController = async (req, res, next) => {
     catch (err) {
         console.log('deleteMessageController: ', err)
     }
+}
+
+
+
+
+export const getLastMessageController = async (req, res, next) => {
+    try{
+
+        const { id } = req.user
+
+
+
+    }
+    catch(err){
+        console.log('getLastMessageController: ', err)
+    }
+
+
+
 }

@@ -6,6 +6,7 @@ CREATE TABLE Channels(
     active BOOLEAN NOT NULL DEFAULT true,
     PRIMARY KEY(id),
     FOREIGN KEY(owner_id) REFERENCES Users(id),
-    FOREIGN KEY(belongs_to) REFERENCES workspaces(name),
+    FOREIGN KEY(belongs_to) REFERENCES workspaces(name) ON DELETE CASCADE,
     CONSTRAINT not_duplicated_channelName_in_workspace  UNIQUE (belongs_to, name)
+    
 );

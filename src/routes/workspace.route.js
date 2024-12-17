@@ -4,10 +4,12 @@ import { addWorkspaceMemberController, createWorkspaceController, deleteWorkspac
 
 const workspaceRouter = express.Router()
 
+workspaceRouter.get('/member', authMiddleware, getUserWorkspacesController(false))
+workspaceRouter.get('/admin', authMiddleware, getUserWorkspacesController(true))
 
 workspaceRouter.post('/', authMiddleware, createWorkspaceController)
-workspaceRouter.get('/', authMiddleware, getUserWorkspacesController)
 workspaceRouter.put('/delete/:workspaceName', authMiddleware, deleteWorkspaceController)
+
 
 /* MEMBERS */
 

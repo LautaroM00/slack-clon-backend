@@ -39,9 +39,9 @@ export const createChannelController = async (req, res, next) => {
 export const deleteChannelController = async (req, res, next) => {
     try {
 
-        const { workspaceName, channelName } = req.params
+        const { workspaceName, channelId } = req.params
 
-        await ChannelRepository.deleteChannel(workspaceName, channelName)
+        await ChannelRepository.deleteChannel(workspaceName, channelId)
 
         const response = new ResponseBuilder()
             .setCode('CHANNEL_DELETED_SUCCESS')

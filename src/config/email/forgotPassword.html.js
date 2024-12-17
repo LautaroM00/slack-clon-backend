@@ -69,7 +69,6 @@ const getForgotPasswordHTML = (name, route) => {
             justify-content: center;
             }
     
-            /* Responsive Styles */
             @media only screen and (max-width: 320px) {
                 .email-container {
                     padding: 10px;
