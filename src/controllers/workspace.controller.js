@@ -1,3 +1,4 @@
+import AppError from "../helpers/builders/AppError.js"
 import ResponseBuilder from "../helpers/builders/ResponseBuilder.js"
 import ChannelRepository from "../repositories/Channel.repository.js"
 import UserRepository from "../repositories/User.repository.js"
@@ -13,7 +14,7 @@ export const createWorkspaceController = async (req, res, next) => {
         const { formState } = req.body
         const {workspaceName, channelName} = formState
         if (String(workspaceName).length < 5 || String(workspaceName).length > 20) {
-            throw new Error()
+            return next(new AppError('Los datos ingresados no cumplen los parámetros solicitados', 400))
         }
 
         await WorkspaceRepository.createWorkspace(workspaceName, id)
@@ -29,11 +30,9 @@ export const createWorkspaceController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('createWorkspaceController: ', err)
+        err.sql ? next(new AppError('El nombre de workspace ingresado ya se encuentra registrado por otro usuario.', 400)) : ''
 
-        err.sql ? console.log(err.sqlMessage) : ''
-
-        return
+        return next(new AppError(err.message, err.code))
     }
 
 }
@@ -46,6 +45,11 @@ export const getUserWorkspacesController = (admin) => {
             const { id } = req.user
     
             const workspaces = admin ? await WorkspaceRepository.getAdminWorkspaces(id) :await  WorkspaceRepository.getMemberWorkspaces(id)
+
+            workspaces.forEach((workspace) => {
+                workspace.owner_id === Number(id) ? workspace.role = 'admin' : workspace.role = 'member'
+            })
+
     
             const response = new ResponseBuilder()
                 .setCode('WORKSPACES_GIVEN_SUCCESS')
@@ -59,7 +63,7 @@ export const getUserWorkspacesController = (admin) => {
     
         }
         catch (err) {
-            console.log('getAllUserWorkspacesController: ', err)
+            return next(new AppError(err.message, err.code))
         }
     }
 
@@ -86,7 +90,7 @@ export const deleteWorkspaceController = async (req, res, next) => {
         return res.json(response)
     }
     catch (err) {
-        console.log('getAllUserWorkspacesController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 
 }
@@ -105,9 +109,7 @@ export const addWorkspaceMemberController = async (req, res, next) => {
         const userDB = await UserRepository.getUser(email)
 
         if (!userDB) {
-            throw {
-                message: 'El usuario ingresado no se encuentra registrado.'
-            }
+            return next(new AppError('El usuario ingresado no existe.', 404))
         }
 
         await WorkspaceRepository.addWorkspaceMember(workspaceName, userDB.id)
@@ -121,7 +123,11 @@ export const addWorkspaceMemberController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('addWorkspaceMemberController: ', err)
+        if(err.sqlState == '23000'){
+            return next(new AppError('El usuario ingresado ya es miembro de este workspace.', 400))
+        }
+
+        return next(new AppError(err.message, err.code))
     }
 
 }
@@ -142,7 +148,7 @@ export const deleteWorkspaceMemberController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('deleteWorkspaceMemberController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 
 }
@@ -169,7 +175,7 @@ export const getWorkspaceMembersController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('deleteWorkspaceMemberController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 }
 
@@ -192,7 +198,7 @@ export const getMemberWorkspacesController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('getAllUserWorkspacesController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 
 }

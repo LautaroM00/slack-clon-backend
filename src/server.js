@@ -8,6 +8,7 @@ import testRouter from './test/test.route.js'
 import workspaceRouter from './routes/workspace.route.js'
 import channelRouter from './routes/channel.route.js'
 import messageRouter from './routes/message.route.js'
+import errorHandlerMiddleware from './middlewares/error.middleware.js'
 
 
 const app = express()
@@ -22,6 +23,8 @@ app.use('/api/channel', channelRouter)
 app.use('/api/message', messageRouter)
 
 app.use('/api/test', testRouter)
+
+app.use(errorHandlerMiddleware)
 
 app.listen(PORT, () => {
     console.log(`El servidor está funcionando en el puerto http://localhost:${PORT}`)

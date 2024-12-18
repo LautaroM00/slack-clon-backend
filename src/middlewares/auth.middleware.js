@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import ENVIROMENT from '../config/ENVIROMENT.js'
+import AppError from '../helpers/builders/AppError.js'
 
 const authMiddleware = (req, res, next) => {
 
@@ -18,7 +19,7 @@ const authMiddleware = (req, res, next) => {
         return next()
     }
     catch(err){
-        console.log('authMiddleware: ', err)
+        return next(new AppError(err.message, err.code))
     }
 }
 

@@ -1,3 +1,4 @@
+import AppError from "../helpers/builders/AppError.js"
 import ResponseBuilder from "../helpers/builders/ResponseBuilder.js"
 import ChannelRepository from "../repositories/Channel.repository.js"
 
@@ -12,9 +13,7 @@ export const createChannelController = async (req, res, next) => {
 
 
         if (String(channelName).length < 3 || String(channelName).length > 23) {
-            throw {
-                message: 'El nombre del CANAL debe tener entre 3 y 23 caracteres inclusive.'
-            }
+            return next(new AppError('El canal debe tener entre 3 y 23 caracteres inclusive.', 400))
         }
 
         await ChannelRepository.createChannel(workspaceName, id, channelName)
@@ -28,7 +27,7 @@ export const createChannelController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('a', err)
+        return next(new AppError(err.message, err.code))
     }
 
 }
@@ -52,7 +51,7 @@ export const deleteChannelController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('deleteChannelController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 
 }
@@ -68,12 +67,6 @@ export const getChannelsController = async (req, res, next) => {
 
         const channels = await ChannelRepository.getChannels(workspaceName)
 
-        if(!channels){
-            throw {
-                message: 'El workspace no contiene canales.'
-            }
-        }
-
         const response = new ResponseBuilder()
             .setCode('CHANNEL/S_DELIVERED_SUCCESS')
             .setMessage('Canale/s enviados con éxito')
@@ -85,7 +78,7 @@ export const getChannelsController = async (req, res, next) => {
         return res.json(response)
     }
     catch (err) {
-        console.log('getChannelsController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 
 }

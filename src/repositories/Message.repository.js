@@ -1,8 +1,8 @@
 import pool from "../config/db.mysql.config.js"
 
-export default class MessageRepository{
+export default class MessageRepository {
 
-    static async getChannelMessages(channel_id){
+    static async getChannelMessages(channel_id) {
 
         const query = `SELECT messages.*, users.name FROM Messages
 INNER JOIN users
@@ -14,8 +14,8 @@ ORDER BY sent_at ASC`
 
         return result[0]
     }
-    
-    static async createMessage(channel_id, sender_id, content){
+
+    static async createMessage(channel_id, sender_id, content) {
 
         const query = 'INSERT INTO Messages(channel_id, sender_id, content) VALUES(?, ?, ?)'
 
@@ -25,8 +25,8 @@ ORDER BY sent_at ASC`
     }
 
 
-        
-    static async deleteMessage(message_id){
+
+    static async deleteMessage(message_id) {
 
         const query = 'UPDATE Messages SET active = 0 WHERE id = ?'
 
@@ -35,16 +35,17 @@ ORDER BY sent_at ASC`
         return result[0]
     }
 
+    static async getLastChannelMessage(channel_id) {
 
-/*     static async getChannelMessages(id){
+        const query = `SELECT messages.*, users.name FROM Messages
+INNER JOIN users
+ON messages.sender_id = users.id
+WHERE channel_id = ? AND messages.active = 1
+ORDER BY sent_at DESC LIMIT 1`
 
-        const query = 'SELECT * FROM Channels WHERE belongs_to = ? AND active = 1'
-
-        const result = await pool.execute(query, [belongs_to])
+        const result = await pool.execute(query, [channel_id])
 
         return result[0]
-    } */
-
-
+    }
 
 }

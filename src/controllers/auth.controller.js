@@ -7,6 +7,7 @@ import getRegisterHTML from "../config/email/register.html.js"
 import getForgotPasswordHTML from "../config/email/forgotPassword.html.js"
 import jwt from 'jsonwebtoken'
 import ENVIROMENT from "../config/ENVIROMENT.js"
+import AppError from "../helpers/builders/AppError.js"
 
 
 
@@ -63,7 +64,7 @@ export const registerController = async (req, res, next) => {
         return res.json(response)
     }
     catch (err) {
-        console.log('registerController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 }
 
@@ -112,7 +113,7 @@ export const loginController = async (req, res, next) => {
         return res.json(response)
     }
     catch (err) {
-        console.log('loginController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 }
 
@@ -144,7 +145,7 @@ export const verifyEmailController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('verifyEmailController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 }
 
@@ -195,7 +196,7 @@ export const forgotPasswordController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('forgotPasswordController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 }
 
@@ -228,6 +229,6 @@ export const resetPasswordController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('resetPasswordController: ', err.message)
+        return next(new AppError(err.message, err.code))
     }
 }

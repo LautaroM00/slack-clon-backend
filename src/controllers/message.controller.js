@@ -1,6 +1,7 @@
 import ResponseBuilder from "../helpers/builders/ResponseBuilder.js"
 import MessageRepository from "../repositories/Message.repository.js"
 import { dateFormatter } from "../helpers/dateFormatter.js"
+import AppError from "../helpers/builders/AppError.js"
 
 export const createMessageController = async (req, res, next) => {
     try {
@@ -10,9 +11,7 @@ export const createMessageController = async (req, res, next) => {
         const { id } = req.user
 
         if (!content) {
-            throw {
-                message: 'El mensaje debe tener contenido.'
-            }
+            return next(new AppError('El mensaje debe tener contenido.', 400))
         }
 
         await MessageRepository.createMessage(channel_id, id, content)
@@ -26,7 +25,7 @@ export const createMessageController = async (req, res, next) => {
 
     }
     catch (err) {
-        console.log('createMessageController: ', err)
+        return next(new AppError(err.message, err.code))
     }
 }
 
@@ -36,27 +35,29 @@ export const createMessageController = async (req, res, next) => {
 
 
 
-export const getMessagesController = async (req, res, next) => {
-    try {
+export const getMessagesController = (amount) => {
+    return async (req, res, next) => {
+        try {
 
-        const { channel_id } = req.params
-
-        const messages = await MessageRepository.getChannelMessages(channel_id)
-
-        const messagesFormatted = dateFormatter(messages)
-        
-        const response = new ResponseBuilder()
-            .setCode('MESSAGE_RECEIVED_SUCCESS')
-            .setMessage('Mensajes recibidos con éxito.')
-            .setPayload({
-                messages: messagesFormatted
-            })
-            .build()
-
-        return res.json(response)
-    }
-    catch (err) {
-        console.log('getMessagesController: ', err)
+            const { channel_id } = req.params
+    
+            const messages = amount === 'all' ? await MessageRepository.getChannelMessages(channel_id) : await MessageRepository.getLastChannelMessage(channel_id) 
+    
+            const messagesFormatted = dateFormatter(messages)
+            
+            const response = new ResponseBuilder()
+                .setCode('MESSAGE_RECEIVED_SUCCESS')
+                .setMessage('Mensajes recibidos con éxito.')
+                .setPayload({
+                    messages: messagesFormatted
+                })
+                .build()
+    
+            return res.json(response)
+        }
+        catch (err) {
+            return next(new AppError(err.message, err.code))
+        }
     }
 }
 
@@ -80,25 +81,6 @@ export const deleteMessageController = async (req, res, next) => {
         return res.json(response)
     }
     catch (err) {
-        console.log('deleteMessageController: ', err)
+        return next(new AppError(err.message, err.code))
     }
-}
-
-
-
-
-export const getLastMessageController = async (req, res, next) => {
-    try{
-
-        const { id } = req.user
-
-
-
-    }
-    catch(err){
-        console.log('getLastMessageController: ', err)
-    }
-
-
-
 }
