@@ -29,11 +29,23 @@ export default class WorkspaceRepository {
         return result[0]['changedRows']
     }
 
+    static async getWorkspaceCreated(owner_id) {
+
+        const query = 'SELECT * FROM Workspaces WHERE owner_id = ? AND active = 1 ORDER BY id DESC LIMIT 1'
+
+        const result = await pool.execute(query, [owner_id])
+
+        return result[0][0]
+    }
+
     /* MEMBERS */
 
-    static async addWorkspaceMember(belongs_to, user_id) {
+    static async addWorkspaceMember(belongs_to, user_id, admin) {
 
-        const query = 'INSERT INTO Workspace_members(belongs_to, user_id) VALUES(?, ?)'
+        
+
+        const query = admin ? 'INSERT INTO Workspace_members(belongs_to, user_id, role) VALUES(?, ?, 1)' :
+        'INSERT INTO Workspace_members(belongs_to, user_id) VALUES(?, ?)'
 
         const result = await pool.execute(query, [belongs_to, user_id])
 
@@ -66,6 +78,15 @@ WHERE workspace_members.belongs_to = ?`
         const result = await pool.execute(query, [belongs_to])
 
         return result[0]
+    }
+
+    static async getWorkspaceAdmin(workspaceName){
+
+        const query = 'SELECT user_id FROM workspace_members WHERE belongs_to = ? AND role = 1'
+
+        const result = await pool.execute(query, [workspaceName])
+
+        return result[0][0].user_id
     }
 
 

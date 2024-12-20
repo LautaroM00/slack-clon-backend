@@ -6,7 +6,8 @@ const channelRouter = express.Router()
 
 channelRouter.post('/:workspaceName', authMiddleware, createChannelController)
 channelRouter.put('/delete/:workspaceName/:channelId', authMiddleware, deleteChannelController)
-channelRouter.get('/:workspaceName', authMiddleware, getChannelsController)
+channelRouter.get('/all/:workspaceName', authMiddleware, getChannelsController('all'))
+channelRouter.get('/last/:workspaceName/:channelName', authMiddleware, getChannelsController('last'))
 
 
 

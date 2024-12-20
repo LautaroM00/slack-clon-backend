@@ -4,7 +4,7 @@ export default class ChannelRepository {
 
     static async createChannel(belongs_to, owner_id, channelName){
 
-        const query = 'INSERT INTO Channels(belongs_to, owner_id, name) VALUES(?, ?, ?)'
+        const query = 'INSERT INTO Channels(belongs_to, owner_id, name) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE active = IF(active = 0, 1, active);'
 
         const result = await pool.execute(query, [belongs_to, owner_id, channelName])
 
@@ -28,6 +28,15 @@ export default class ChannelRepository {
         const query = 'SELECT * FROM Channels WHERE belongs_to = ? AND active = 1'
 
         const result = await pool.execute(query, [belongs_to])
+
+        return result[0]
+    }
+
+    static async getChannelByName(belongs_to, channel_name){
+
+        const query = 'SELECT * FROM Channels WHERE belongs_to = ? AND name = ? AND active = 1 ORDER BY id DESC LIMIT 1'
+
+        const result = await pool.execute(query, [belongs_to, channel_name])
 
         return result[0]
     }

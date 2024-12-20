@@ -1,6 +1,7 @@
 import AppError from "../helpers/builders/AppError.js"
 import ResponseBuilder from "../helpers/builders/ResponseBuilder.js"
 import ChannelRepository from "../repositories/Channel.repository.js"
+import WorkspaceRepository from "../repositories/Workspace.repository.js"
 
 export const createChannelController = async (req, res, next) => {
     try {
@@ -27,6 +28,11 @@ export const createChannelController = async (req, res, next) => {
 
     }
     catch (err) {
+
+        console.log(err)
+
+        err.sqlState == 23000 ? err.message = 'Ya existe un canal con el nombre ingresado.' : ''
+
         return next(new AppError(err.message, err.code))
     }
 
@@ -60,39 +66,33 @@ export const deleteChannelController = async (req, res, next) => {
 
 
 
-export const getChannelsController = async (req, res, next) => {
-    try {
+export const getChannelsController = (amount) => {
 
-        const { workspaceName } = req.params
+    return async (req, res, next) => {
+        try {
 
-        const channels = await ChannelRepository.getChannels(workspaceName)
+            const { id } = req.user
 
-        const response = new ResponseBuilder()
-            .setCode('CHANNEL/S_DELIVERED_SUCCESS')
-            .setMessage('Canale/s enviados con éxito')
-            .setPayload({
-                channels: channels
-            })
-            .build()
+            const { workspaceName, channelName } = req.params
 
-        return res.json(response)
-    }
-    catch (err) {
-        return next(new AppError(err.message, err.code))
-    }
+            const channels = amount === 'all' ? await ChannelRepository.getChannels(workspaceName) : await ChannelRepository.getChannelByName(workspaceName, channelName)
 
-}
+            const adminId = await WorkspaceRepository.getWorkspaceAdmin(workspaceName)
+            
+            const response = new ResponseBuilder()
+                .setCode('CHANNEL/S_DELIVERED_SUCCESS')
+                .setMessage('Canal/es enviado/s con éxito')
+                .setPayload({
+                    channels: channels,
+                    isAdmin: adminId == id
+                })
+                .build()
 
-
-
-/* export const deleteChannelController = async(req, res, next) => {
-    try{
-
-    }
-    catch(err){
-        console.log('a', err)
+            return res.json(response)
+        }
+        catch (err) {
+            return next(new AppError(err.message, err.code))
+        }
     }
 
 }
-
- */

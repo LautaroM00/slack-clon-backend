@@ -34,10 +34,11 @@ export const registerController = async (req, res, next) => {
         }
 
         if (Object.keys(errors).length > 0) {
-            throw { errors: errors }
+            return next(new AppError('Los datos ingresados no cumplen los parámetros solicitados', 400))
+
         }
 
-        userData.password = await bcrypt.hash(userData.password, 10)
+/*         userData.password = await bcrypt.hash(userData.password, 10) */
 
         const verificationToken = jwt.sign({
             email: userData.email
@@ -48,17 +49,17 @@ export const registerController = async (req, res, next) => {
             }
         )
 
-        await UserRepository.createUser(userData)
+/*         await UserRepository.createUser(userData)
 
         await emailTransporter.sendMail({
             to: userData.email,
             subject: 'Slack clon - Confirmación de registro',
             html: getRegisterHTML(userData.name, ENVIROMENT.URL_FRONT + '/verify-email/' + verificationToken)
-        })
+        }) */
 
         const response = new ResponseBuilder()
             .setCode('USER_CREATED_SUCCESS')
-            .setMessage('Usuario creado con éxito.')
+            .setMessage(`Usuario creado con éxito. \n Se envió un correo de validación a: ${userData.email}`)
             .build()
 
         return res.json(response)
@@ -85,11 +86,13 @@ export const loginController = async (req, res, next) => {
 
         const userDB = await UserRepository.getUser(email)
 
-/*         if (!await bcrypt.compare(password, userDB.password)) {
-            throw {
-                error: 'Las contraseñas no coinciden'
-            }
-        } */
+        if (!userDB) {
+            return next(new AppError('El email ingresado no se encuentra registrado.', 400))
+        }
+
+        if (!await bcrypt.compare(password, userDB.password)) {
+            return next(new AppError('La contraseña es incorrecta.', 400))
+        }
 
         const accessToken = jwt.sign({
             email: email,
@@ -145,6 +148,9 @@ export const verifyEmailController = async (req, res, next) => {
 
     }
     catch (err) {
+        if(err.message === 'jwt expired'){
+            return next(new AppError('El enlace de verificación de email venció.', err.code))
+        }
         return next(new AppError(err.message, err.code))
     }
 }
@@ -222,7 +228,7 @@ export const resetPasswordController = async (req, res, next) => {
 
         const response = new ResponseBuilder()
             .setCode('PASSWORD_RESET_SUCCESS')
-            .setMessage('La contraseña se actualizó correctamente')
+            .setMessage('Contraseña modificada con éxito.')
             .build()
 
         return res.json(response)

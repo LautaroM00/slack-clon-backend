@@ -12,18 +12,27 @@ export const createWorkspaceController = async (req, res, next) => {
         const { id } = req.user
 
         const { formState } = req.body
-        const {workspaceName, channelName} = formState
+        const { workspaceName, channelName } = formState
+
+        if(!workspaceName || !channelName){
+            return next(new AppError('No se ingresaron datos.', 400))
+        }
+
         if (String(workspaceName).length < 5 || String(workspaceName).length > 20) {
             return next(new AppError('Los datos ingresados no cumplen los parámetros solicitados', 400))
         }
 
         await WorkspaceRepository.createWorkspace(workspaceName, id)
-        await WorkspaceRepository.addWorkspaceMember(workspaceName, id)
+        await WorkspaceRepository.addWorkspaceMember(workspaceName, id, 'admin')
         await ChannelRepository.createChannel(workspaceName, id, channelName)
+        const workspaceCreated = await WorkspaceRepository.getWorkspaceCreated(id)
 
         const response = new ResponseBuilder()
             .setCode('WORKSPACE_CREATED_SUCCESS')
             .setMessage('Workspace creado con éxito.')
+            .setPayload({
+                workspace: workspaceCreated
+            })
             .build()
 
         return res.json(response)
@@ -43,14 +52,14 @@ export const getUserWorkspacesController = (admin) => {
         try {
 
             const { id } = req.user
-    
-            const workspaces = admin ? await WorkspaceRepository.getAdminWorkspaces(id) :await  WorkspaceRepository.getMemberWorkspaces(id)
+
+            const workspaces = admin ? await WorkspaceRepository.getAdminWorkspaces(id) : await WorkspaceRepository.getMemberWorkspaces(id)
 
             workspaces.forEach((workspace) => {
                 workspace.owner_id === Number(id) ? workspace.role = 'admin' : workspace.role = 'member'
             })
 
-    
+
             const response = new ResponseBuilder()
                 .setCode('WORKSPACES_GIVEN_SUCCESS')
                 .setMessage('Workspaces enviados con éxito.')
@@ -58,9 +67,9 @@ export const getUserWorkspacesController = (admin) => {
                     workspaces: workspaces
                 })
                 .build()
-    
+
             return res.json(response)
-    
+
         }
         catch (err) {
             return next(new AppError(err.message, err.code))
@@ -109,7 +118,7 @@ export const addWorkspaceMemberController = async (req, res, next) => {
         const userDB = await UserRepository.getUser(email)
 
         if (!userDB) {
-            return next(new AppError('El usuario ingresado no existe.', 404))
+            return next(new AppError('El email ingresado no está registrado.', 404))
         }
 
         await WorkspaceRepository.addWorkspaceMember(workspaceName, userDB.id)
@@ -123,7 +132,7 @@ export const addWorkspaceMemberController = async (req, res, next) => {
 
     }
     catch (err) {
-        if(err.sqlState == '23000'){
+        if (err.sqlState == '23000') {
             return next(new AppError('El usuario ingresado ya es miembro de este workspace.', 400))
         }
 

@@ -25,6 +25,10 @@ export const createMessageController = async (req, res, next) => {
 
     }
     catch (err) {
+        if(err.sql){
+            return next(new AppError(err.sqlMessage, err.sqlState))
+        }
+
         return next(new AppError(err.message, err.code))
     }
 }
